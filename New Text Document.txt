@@ -1,0 +1,58 @@
+#include <TM1637Display.h>
+#define CLK 3
+#define DIO 2
+
+TM1637Display display(CLK, DIO);
+
+// Custom segment encoding for A–Z (Uppercase)
+// Each byte corresponds to a 7-segment display letter
+const uint8_t alphabet[] = {
+  SEG_A | SEG_B | SEG_C | SEG_E | SEG_F | SEG_G,       // A
+  SEG_C | SEG_D | SEG_E | SEG_F | SEG_G | SEG_A | SEG_B,// B
+  SEG_A | SEG_D | SEG_E | SEG_F,                       // C
+  SEG_B | SEG_C | SEG_D | SEG_E | SEG_F,               // D
+  SEG_A | SEG_D | SEG_E | SEG_F | SEG_G,               // E
+  SEG_A | SEG_E | SEG_F | SEG_G,                       // F
+  SEG_A | SEG_C | SEG_D | SEG_E | SEG_F,               // G
+  SEG_B | SEG_C | SEG_E | SEG_F | SEG_G,               // H
+  SEG_E | SEG_F,                                       // I
+  SEG_B | SEG_C | SEG_D,                               // J
+  SEG_D | SEG_E | SEG_F,                               // L
+  SEG_A | SEG_B | SEG_C | SEG_D | SEG_E | SEG_F,       // O
+  SEG_A | SEG_B | SEG_E | SEG_F | SEG_G,               // P
+  SEG_A | SEG_C | SEG_D | SEG_F | SEG_G,               // S
+  SEG_D | SEG_E | SEG_F | SEG_G,                       // t
+  SEG_B | SEG_C | SEG_D | SEG_E | SEG_F,               // U
+  SEG_B | SEG_C | SEG_D | SEG_F | SEG_G,               // Y
+  SEG_A | SEG_B | SEG_D | SEG_E | SEG_G                // Z
+};
+
+void setup() {
+  display.setBrightness(0x0f); // Max brightness
+}
+
+void loop() {
+  // Create a buffer of 4 digits
+  uint8_t buffer[4] = { 0, 0, 0, 0 };
+
+  // Total number of scroll steps (26 letters + 4 empty slots)
+  for (int i = 0; i < 18 + 4; i++) {
+    // Shift letters left in the buffer
+    for (int j = 0; j < 3; j++) {
+      buffer[j] = buffer[j + 1];
+    }
+
+    // Add next letter or blank
+    if (i < 18) {
+      buffer[3] = alphabet[i];
+    } else {
+      buffer[3] = 0x00; // Blank after Z
+    }
+
+    // Show on display
+    display.setSegments(buffer);
+
+    delay(500); // Adjust scroll speed here
+  }
+}
+
